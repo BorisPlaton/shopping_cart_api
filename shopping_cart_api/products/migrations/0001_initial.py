@@ -7,7 +7,6 @@ import mptt.fields
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -23,7 +22,10 @@ class Migration(migrations.Migration):
                 ('rght', models.PositiveIntegerField(editable=False)),
                 ('tree_id', models.PositiveIntegerField(db_index=True, editable=False)),
                 ('level', models.PositiveIntegerField(editable=False)),
-                ('parent_category', mptt.fields.TreeForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='subcategories', to='products.category', verbose_name='Parent category')),
+                ('parent_category',
+                 mptt.fields.TreeForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                            related_name='subcategories', to='products.category',
+                                            verbose_name='Parent category')),
             ],
             options={
                 'verbose_name': 'Category',
@@ -35,15 +37,40 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=64, verbose_name='Product name')),
-                ('slug', autoslug.fields.AutoSlugField(allow_unicode=True, editable=False, max_length=256, populate_from='name', unique=True, verbose_name='Product slug')),
+                ('slug',
+                 autoslug.fields.AutoSlugField(allow_unicode=True, editable=False, max_length=256, populate_from='name',
+                                               unique=True, verbose_name='Product slug')),
                 ('description', models.TextField(verbose_name='Product description')),
                 ('price', models.PositiveIntegerField(verbose_name='Product price')),
                 ('rating', models.PositiveIntegerField(verbose_name='Product rating')),
-                ('categories', mptt.fields.TreeManyToManyField(related_name='products', to='products.category', verbose_name='Product categories')),
+                ('categories', mptt.fields.TreeManyToManyField(related_name='products', to='products.category',
+                                                               verbose_name='Product categories')),
             ],
+            options={
+                'verbose_name': 'Product',
+                'verbose_name_plural': 'Products',
+            },
         ),
         migrations.AddConstraint(
             model_name='category',
             constraint=models.CheckConstraint(check=models.Q(('level__lte', 2)), name='depth_level_is_lte_2'),
         ),
+        migrations.RunSQL(
+            """
+            CREATE OR REPLACE FUNCTION check_category_level() RETURNS TRIGGER AS $$
+            BEGIN
+                IF (SELECT level
+                FROM products_category
+                WHERE id = NEW.category_id) <= 0 THEN
+                    RETURN NULL;
+                END IF;
+                RETURN NEW;
+            END
+            $$ LANGUAGE plpgsql;
+
+            CREATE OR REPLACE TRIGGER check_product_category_level 
+            BEFORE INSERT OR UPDATE ON products_product_categories
+            FOR EACH ROW EXECUTE PROCEDURE check_category_level();
+            """
+        )
     ]

@@ -7,7 +7,7 @@
 #
 # You may run a down_environment.sh script to stop all running containers.
 
-ENV_FILES=('.env' '.env.dist')
+ENV_FILES=('.env.dist' '.env')
 DOCKER_FILE='docker-compose.dev.yml'
 CURRENT_DIR=$(pwd)
 

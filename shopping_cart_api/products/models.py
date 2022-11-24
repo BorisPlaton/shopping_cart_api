@@ -24,6 +24,7 @@ class Category(MPTTModel):
 
     class MPTTMeta:
         order_insertion_by = ['name']
+        parent_attr = 'parent_category'
 
 
 class Product(models.Model):
@@ -40,3 +41,7 @@ class Product(models.Model):
     )
     price = models.PositiveIntegerField("Product price")
     rating = models.PositiveIntegerField("Product rating")
+
+    class Meta:
+        verbose_name = "Product"
+        verbose_name_plural = "Products"
