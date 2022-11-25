@@ -25,9 +25,6 @@ INSTALLED_APPS = [
     'mptt',
 
     'products',
-    'shopping_cart',
-    'user_auth',
-    'orders',
 ]
 
 MIDDLEWARE = [
