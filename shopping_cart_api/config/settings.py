@@ -5,8 +5,10 @@ import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env()
-environ.Env.read_env(BASE_DIR.parent / '.env.dist')
+env = environ.Env(
+    ENV_FILE=(str, '.env.dist')
+)
+environ.Env.read_env(BASE_DIR.parent / env('ENV_FILE'))
 
 SECRET_KEY = env('SECRET_KEY')
 
