@@ -3,6 +3,9 @@ name: Testing
 on:
   push:
     branches: [ main ]
+    paths:
+      - '!**.md'
+      - '!scripts/**'
   pull_request:
     branches: [ main ]
       
