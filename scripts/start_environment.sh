@@ -30,7 +30,7 @@ if ! [[ -f $DOCKER_FILE ]]; then
 fi
 
 if docker-compose --env-file="$ENV_FILE" -f "$DOCKER_FILE" up -d "$@"; then
-  echo -e "\033[1;32mSuccess"
+  echo -e "\033[1;32mSuccess\033[0m"
 else
-  echo "\033[1;31mFailure"
+  echo -e "\033[1;31mFailure\033[0m"
 fi

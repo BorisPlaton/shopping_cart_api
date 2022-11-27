@@ -27,5 +27,8 @@ if ! [[ -f $DOCKER_FILE ]]; then
   exit 1
 fi
 
-docker-compose --env-file="$ENV_FILE" -f "$DOCKER_FILE" down "$@"
-echo -e "\033[1;32mSuccess"
+if docker-compose --env-file="$ENV_FILE" -f "$DOCKER_FILE" down "$@"; then
+  echo -e "\033[1;32mSuccess\033[0m"
+else
+  echo -e "\033[1;31mFailure\033[0m"
+fi
