@@ -1,0 +1,62 @@
+[
+  {
+    "model": "products.category",
+    "pk": 1,
+    "fields": {
+      "name": "Clothes",
+      "parent_category": null,
+      "lft": 1,
+      "rght": 6,
+      "tree_id": 2,
+      "level": 0
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 2,
+    "fields": {
+      "name": "T-shirts",
+      "parent_category": 1,
+      "lft": 4,
+      "rght": 5,
+      "tree_id": 2,
+      "level": 1
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 3,
+    "fields": {
+      "name": "Pants",
+      "parent_category": 1,
+      "lft": 2,
+      "rght": 3,
+      "tree_id": 2,
+      "level": 1
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 4,
+    "fields": {
+      "name": "Books",
+      "parent_category": null,
+      "lft": 1,
+      "rght": 4,
+      "tree_id": 1,
+      "level": 0
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 5,
+    "fields": {
+      "name": "Classics",
+      "parent_category": 4,
+      "lft": 2,
+      "rght": 3,
+      "tree_id": 1,
+      "level": 1
+    }
+  }
+]

@@ -7,7 +7,10 @@ from products.services.selectors import get_all_root_categories
 
 
 class CategoriesTree(APIView):
-    """Views all products categories."""
+    """
+    Returns a list of all product categories in hierarchical
+    order.
+    """
 
     def get(self, request: Request):
         """
@@ -17,3 +20,11 @@ class CategoriesTree(APIView):
         return Response(
             CategorySerializer(get_all_root_categories(), many=True).data
         )
+
+
+class SpecificProduct(APIView):
+    """Returns a specific product by its slug."""
+
+    def get(self, request: Request, slug: str):
+        """Returns product data if it exists."""
+        pass

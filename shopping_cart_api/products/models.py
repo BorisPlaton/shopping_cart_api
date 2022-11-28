@@ -1,6 +1,7 @@
 from autoslug import AutoSlugField
 from django.db import models
-from mptt.models import MPTTModel, TreeForeignKey, TreeManyToManyField
+from django.db.models import ForeignKey
+from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Category(MPTTModel):
@@ -32,12 +33,12 @@ class Product(models.Model):
 
     name = models.CharField("Product name", max_length=64)
     slug = AutoSlugField(
-        "Product slug", populate_from='name', allow_unicode=True,
-        max_length=256, unique=True
+        "Product slug", populate_from='name', max_length=256, unique=True
     )
     description = models.TextField("Product description")
-    categories = TreeManyToManyField(
-        Category, related_name='products', verbose_name="Product categories"
+    category = ForeignKey(
+        Category, on_delete=models.CASCADE, related_name='products',
+        verbose_name="Product category"
     )
     price = models.PositiveIntegerField("Product price")
     rating = models.PositiveIntegerField("Product rating")
