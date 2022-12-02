@@ -1,8 +1,6 @@
 import pytest
-from django.http import Http404
-from model_bakery import baker
+from rest_framework.exceptions import NotFound
 
-from products.models import Product
 from products.services.selectors import get_all_root_categories, get_product_by_slug
 
 
@@ -27,10 +25,10 @@ class TestCategorySelectors:
 class TestProductSelectors:
 
     def test_get_product_by_slug_raise_404_exception_if_none_exists(self):
-        with pytest.raises(Http404) as e:
+        with pytest.raises(NotFound) as e:
             get_product_by_slug("not-existed-slug")
-        assert str(e.value) == "Product matching query does not exist."
+        assert e.value.status_code == 404
 
-    def test_specific_product_is_returned_by_its_slug(self, create_category):
-        product = baker.make(Product, slug=None, category=create_category(create_category()))
+    def test_specific_product_is_returned_by_its_slug(self, create_product):
+        product = create_product()
         assert product == get_product_by_slug(product.slug)

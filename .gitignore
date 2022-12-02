@@ -1,6 +1,7 @@
 .env
 db.sqlite3
 venv
+htmlcov
 .idea
 .coverage
 .pytest_cache

@@ -22,7 +22,41 @@ class TestCategoriesTreeView:
         root_category = create_category()
         subcategory = create_category(root_category)
         response: Response = api_client.get(reverse('products:categories'))
-        assert len(response.data) == 1
-        assert response.data[0]['name'] == root_category.name
-        assert response.data[0]['subcategories'][0]['name'] == subcategory.name
-        assert response.data[0]['subcategories'][0]['subcategories'] == []
+        assert response.status_code == 200
+        assert response.data == [{
+            "id": root_category.pk,
+            "name": root_category.name,
+            "subcategories": [
+                {
+                    "id": subcategory.pk,
+                    "name": subcategory.name,
+                    "subcategories": []
+                }
+            ]
+        }]
+
+
+@pytest.mark.django_db
+class TestSpecificProductView:
+
+    def test_view_returns_404_status_code_if_product_doesnt_exist(self, api_client):
+        response: Response = api_client.get(reverse('products:product', args=['wrong-slug']))
+        assert response.status_code == 404
+        assert response.data.keys() == {'detail'}
+
+    def test_view_returns_specific_product_by_slug_and_200_status_code(self, api_client, create_product):
+        product = create_product()
+        response: Response = api_client.get(reverse('products:product', args=[product.slug]))
+        assert response.status_code == 200
+        assert response.data == {
+            "id": product.pk,
+            "slug": product.slug,
+            "name": product.name,
+            "categories": [
+                {"id": category.pk, "name": category.name} for category in
+                product.category.get_ancestors(include_self=True)
+            ],
+            "description": product.description,
+            "price": product.price,
+            "rating": product.rating,
+        }

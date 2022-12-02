@@ -42,7 +42,7 @@
       "name": "Books",
       "parent_category": null,
       "lft": 1,
-      "rght": 4,
+      "rght": 6,
       "tree_id": 1,
       "level": 0
     }
@@ -54,9 +54,33 @@
       "name": "Classics",
       "parent_category": 4,
       "lft": 2,
-      "rght": 3,
+      "rght": 5,
       "tree_id": 1,
       "level": 1
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 6,
+    "fields": {
+      "name": "Russian",
+      "parent_category": 5,
+      "lft": 3,
+      "rght": 4,
+      "tree_id": 1,
+      "level": 2
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 1,
+    "fields": {
+      "name": "War and Peace",
+      "slug": "war-and-peace",
+      "description": "War and Peace is a literary work by the Russian author Leo Tolstoy that mixes fictional narrative with chapters on history and philosophy.",
+      "category": 6,
+      "price": 500,
+      "rating": 4.5
     }
   }
 ]

@@ -1,4 +1,5 @@
 from autoslug import AutoSlugField
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import ForeignKey
 from mptt.models import MPTTModel, TreeForeignKey
@@ -27,6 +28,9 @@ class Category(MPTTModel):
         order_insertion_by = ['name']
         parent_attr = 'parent_category'
 
+    def __str__(self):
+        return self.name
+
 
 class Product(models.Model):
     """The shop product model."""
@@ -40,9 +44,12 @@ class Product(models.Model):
         Category, on_delete=models.CASCADE, related_name='products',
         verbose_name="Product category"
     )
-    price = models.PositiveIntegerField("Product price")
-    rating = models.PositiveIntegerField("Product rating")
+    price = models.FloatField("Product price", validators=[MinValueValidator(0)])
+    rating = models.FloatField("Product rating", validators=[MinValueValidator(0), MaxValueValidator(5)])
 
     class Meta:
         verbose_name = "Product"
         verbose_name_plural = "Products"
+
+    def __str__(self):
+        return self.name

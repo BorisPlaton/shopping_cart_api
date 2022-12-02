@@ -1,6 +1,5 @@
 import pytest
 from django.db import IntegrityError, transaction
-from model_bakery import baker
 
 from products.models import Category, Product
 
@@ -49,34 +48,27 @@ class TestProductModel:
             'rating': 5,
         }
 
-    def test_product_can_be_created(self, create_category):
-        baker.make(Product, slug=None, category=create_category(create_category()))
+    def test_product_can_be_created(self, create_product):
+        create_product()
         assert Product.objects.count() == 1
 
-    def test_product_has_auto_generated_slug(self, product_data, create_category):
-        product = Product.objects.create(**product_data, category=create_category(create_category()))
+    def test_product_has_auto_generated_slug(self, product_data, create_product):
+        product = create_product(**product_data)
         assert product.slug == product.name.lower()
 
-    def test_product_has_unique_auto_generated_slug(self, product_data, create_category):
-        products = [
-            Product.objects.create(**product_data, category=create_category(create_category()))
-            for _ in range(2)
-        ]
+    def test_product_has_unique_auto_generated_slug(self, product_data, create_product):
+        products = [create_product(**product_data) for _ in range(2)]
         assert all(products)
         assert products[0].slug != products[1].slug
 
-    def test_product_has_category_level_greater_than_0(self, create_category, product_data):
+    def test_product_has_category_level_greater_than_0(self, create_nested_category, product_data):
         with pytest.raises(IntegrityError), transaction.atomic():
-            Product.objects.create(**product_data, category=create_category())
-        category = create_category(create_category())
+            Product.objects.create(**product_data, category=create_nested_category(0))
+        assert not Product.objects.count()
+        category = create_nested_category(2)
         product = Product.objects.create(**product_data, category=category)
+        assert Product.objects.count() == 1
         assert product.category == category
 
-    def test_product_slug_can_be_created_from_unicode_letters(self, create_category):
-        assert Product.objects.create(
-            name='тестовый продукт',
-            description='nothing',
-            price=500,
-            rating=5,
-            category=create_category(create_category())
-        ).slug == 'testovyi-produkt'
+    def test_product_slug_can_be_created_from_unicode_letters(self, create_product):
+        assert create_product(name='тестовый продукт').slug == 'testovyi-produkt'
