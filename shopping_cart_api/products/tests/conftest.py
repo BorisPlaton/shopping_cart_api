@@ -8,8 +8,9 @@ from products.models import Category, Product
 
 @pytest.fixture
 def create_category():
-    def inner(parent_category: Category = None) -> Category:
-        return Category.objects.create(name=uuid.uuid4().hex, parent_category=parent_category)
+    def inner(parent_category: Category = None, **kwargs) -> Category:
+        kwargs.setdefault('name', uuid.uuid4().hex)
+        return Category.objects.create(parent_category=parent_category, **kwargs)
 
     return inner
 

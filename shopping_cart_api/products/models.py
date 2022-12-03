@@ -6,7 +6,9 @@ from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Category(MPTTModel):
-    """The product category model."""
+    """
+    The product category model.
+    """
 
     name = models.CharField("Category name", max_length=32, unique=True)
     parent_category = TreeForeignKey(
@@ -33,7 +35,9 @@ class Category(MPTTModel):
 
 
 class Product(models.Model):
-    """The shop product model."""
+    """
+    The shop product model.
+    """
 
     name = models.CharField("Product name", max_length=64)
     slug = AutoSlugField(

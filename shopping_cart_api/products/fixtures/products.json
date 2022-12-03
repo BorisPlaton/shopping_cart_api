@@ -42,7 +42,7 @@
       "name": "Books",
       "parent_category": null,
       "lft": 1,
-      "rght": 6,
+      "rght": 12,
       "tree_id": 1,
       "level": 0
     }
@@ -54,7 +54,7 @@
       "name": "Classics",
       "parent_category": 4,
       "lft": 2,
-      "rght": 5,
+      "rght": 11,
       "tree_id": 1,
       "level": 1
     }
@@ -65,8 +65,32 @@
     "fields": {
       "name": "Russian",
       "parent_category": 5,
+      "lft": 7,
+      "rght": 8,
+      "tree_id": 1,
+      "level": 2
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 7,
+    "fields": {
+      "name": "English",
+      "parent_category": 5,
       "lft": 3,
       "rght": 4,
+      "tree_id": 1,
+      "level": 2
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 9,
+    "fields": {
+      "name": "USA",
+      "parent_category": 5,
+      "lft": 9,
+      "rght": 10,
       "tree_id": 1,
       "level": 2
     }
@@ -79,8 +103,20 @@
       "slug": "war-and-peace",
       "description": "War and Peace is a literary work by the Russian author Leo Tolstoy that mixes fictional narrative with chapters on history and philosophy.",
       "category": 6,
-      "price": 500,
+      "price": 500.0,
       "rating": 4.5
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 2,
+    "fields": {
+      "name": "Flies lord",
+      "slug": "flies-lord",
+      "description": "Nothing",
+      "category": 9,
+      "price": 350.0,
+      "rating": 4.3
     }
   }
 ]

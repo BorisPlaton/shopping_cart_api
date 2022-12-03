@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.exceptions import NotFound
 
-from products.services.selectors import get_all_root_categories, get_product_by_slug
+from products.services.selectors import get_all_root_categories, get_product_by_slug, get_categories_by_names
 
 
 @pytest.mark.django_db
@@ -19,6 +19,19 @@ class TestCategorySelectors:
         assert len(root_categories) == 1
         assert top_level_category in root_categories
         assert subcategory not in root_categories
+
+    def test_get_categories_by_names_works_correct_with_case_insensitive_names(self, create_category):
+        names_list = ['one', 'One', 'oNe', 'ONE']
+        categories = [create_category(name=name) for name in names_list]
+        matched_categories = get_categories_by_names(['one'])
+        for initial_category in categories:
+            assert initial_category in matched_categories
+
+    def test_get_categories_by_names_may_work_with_case_sensitive_names(self, create_category):
+        names_list = ['one', 'One', 'oNe', 'ONE']
+        categories = [create_category(name=name) for name in names_list]
+        matched_categories = get_categories_by_names(['one'], case_insensitive=False)
+        assert categories[0] == matched_categories.first()
 
 
 @pytest.mark.django_db
