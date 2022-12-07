@@ -19,7 +19,6 @@ class Category(MPTTModel):
     class Meta:
         verbose_name = "Category"
         verbose_name_plural = "Categories"
-
         constraints = [
             models.CheckConstraint(
                 check=models.Q(level__lte=2), name="depth_level_is_lte_2"
