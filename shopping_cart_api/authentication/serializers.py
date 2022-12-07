@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from authentication.models import CustomUser
+from authentication.models import CustomUser, ContactInformation
 from authentication.services.services import create_user
 
 
@@ -38,3 +38,13 @@ class UserSerializer(serializers.ModelSerializer):
         return create_user(
             **{field: value for field, value in validated_data.items() if field in user_credentials}
         )
+
+
+class ContactInformationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user's contact information.
+    """
+
+    class Meta:
+        model = ContactInformation
+        fields = ['id', 'phone_number', 'location']

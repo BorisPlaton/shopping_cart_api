@@ -18,7 +18,8 @@ def create_category():
 @pytest.fixture
 def create_product(create_nested_category):
     def inner(**kwargs) -> Product:
-        return baker.make(Product, slug=None, category=create_nested_category(2), **kwargs)
+        kwargs.setdefault('category', create_nested_category(2))
+        return baker.make(Product, slug=None, **kwargs)
 
     return inner
 

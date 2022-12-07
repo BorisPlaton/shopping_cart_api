@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
     'mptt',
+    'phonenumber_field',
 
     'products',
     'authentication',

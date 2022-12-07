@@ -11,7 +11,7 @@ def get_all_products() -> TreeQuerySet[Category]:
     Returns all categories that are stored in the
     database.
     """
-    return Product.objects.select_related('category').all()
+    return Product.objects.select_related('category').all().order_by('id')
 
 
 def get_all_root_categories() -> TreeQuerySet[Category]:

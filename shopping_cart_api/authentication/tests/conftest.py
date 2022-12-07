@@ -22,3 +22,11 @@ def user_credentials_for_registration(user_credentials):
         "password": "qwerty",
         "repeat_password": "qwerty",
     }
+
+
+@pytest.fixture
+def contact_information():
+    return {
+        'phone_number': '+441234567890',
+        'location': 'NY',
+    }
