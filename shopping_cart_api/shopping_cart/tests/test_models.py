@@ -14,7 +14,7 @@ class TestShoppingCart:
         cart = ShoppingCart.objects.create()
         assert cart.pk is not None
 
-    def test_if_shopping_cart_has_not_products_than_last_updated_at_returns_none(self):
+    def test_if_shopping_cart_doesnt_have_products_than_last_updated_at_returns_none(self):
         cart = ShoppingCart.objects.create()
         assert cart.last_updated_at is None
 
@@ -38,3 +38,9 @@ class TestOrderedProduct:
     def test_product_updated_at_is_optionally_argument(self, create_product):
         ordered_product = baker.make(OrderedProduct, product=create_product())
         assert isinstance(ordered_product.updated_at, datetime)
+
+    def test_two_equals_products_cant_be_in_one_cart(self, create_product):
+        product = create_product()
+        ordered_product = baker.make(OrderedProduct, product=product)
+        with pytest.raises(IntegrityError):
+            baker.make(OrderedProduct, product=product, cart=ordered_product.cart)

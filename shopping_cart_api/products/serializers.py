@@ -1,5 +1,6 @@
 from django.db.models import QuerySet
 from rest_framework import serializers
+from rest_framework_recursive.fields import RecursiveField
 
 from products.models import Category, Product
 
@@ -19,7 +20,7 @@ class TreeCategorySerializer(CategorySerializer):
     Serializes categories as a tree structure. Starts from root to the leafs.
     """
 
-    subcategories = serializers.SerializerMethodField()
+    subcategories = RecursiveField(many=True)
 
     class Meta(CategorySerializer.Meta):
         fields = CategorySerializer.Meta.fields + ['subcategories']
@@ -30,14 +31,8 @@ class TreeCategorySerializer(CategorySerializer):
         Loads all subcategories to prevent the N+1 problem.
         """
         return queryset.prefetch_related(
-            'subcategories__subcategories'
+            'subcategories__subcategories__subcategories'
         )
-
-    def get_subcategories(self, obj: Category):
-        """
-        Make a recursive serialization of all subcategories.
-        """
-        return [TreeCategorySerializer(category).data for category in obj.subcategories.all()]
 
 
 class ProductSerializer(serializers.ModelSerializer):

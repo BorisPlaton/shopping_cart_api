@@ -6,9 +6,10 @@ from rest_framework.viewsets import GenericViewSet
 from authentication.serializers import UserSerializer, ContactInformationSerializer
 from authentication.services.selectors import get_all_users
 from authentication.services.services import create_user_contact_information
+from multiple_serializers.mixin import MultipleSerializerMixin
 
 
-class UserView(GenericViewSet):
+class UserView(MultipleSerializerMixin, GenericViewSet):
     """
     Handles the User model.
     """
@@ -37,9 +38,3 @@ class UserView(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         contact_information = create_user_contact_information(pk, **serializer.validated_data)
         return Response(self.get_serializer(contact_information).data, status=201)
-
-    def get_serializer_class(self):
-        """
-        Returns a specific serializer for a specific action.
-        """
-        return self.serializer_class[self.action]

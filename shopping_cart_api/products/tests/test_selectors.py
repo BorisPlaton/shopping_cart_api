@@ -1,7 +1,8 @@
 import pytest
 from rest_framework.exceptions import NotFound
 
-from products.services.selectors import get_all_root_categories, get_product_by_slug, get_categories_by_names
+from products.services.selectors import get_all_root_categories, get_product_by_slug, get_categories_by_names, \
+    get_products_by_ids
 
 
 @pytest.mark.django_db
@@ -45,3 +46,8 @@ class TestProductSelectors:
     def test_specific_product_is_returned_by_its_slug(self, create_product):
         product = create_product()
         assert product == get_product_by_slug(product.slug)
+
+    def test_get_products_by_ids_returns_products_only_with_specified_ids(self, create_product):
+        product = create_product()
+        create_product()
+        assert get_products_by_ids([product.pk]).first() == product

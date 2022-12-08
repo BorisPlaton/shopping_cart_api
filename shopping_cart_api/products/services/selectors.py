@@ -14,6 +14,13 @@ def get_all_products() -> TreeQuerySet[Category]:
     return Product.objects.select_related('category').all().order_by('id')
 
 
+def get_products_by_ids(product_ids: list[int]) -> QuerySet[Product]:
+    """
+    Returns the QuerySet of products whose ids match the given.
+    """
+    return Product.objects.filter(pk__in=product_ids).all()
+
+
 def get_all_root_categories() -> TreeQuerySet[Category]:
     """
     Returns all root categories (Categories which don't

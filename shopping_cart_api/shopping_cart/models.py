@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime
 
-from django.contrib.sessions.models import Session
 from django.db import models
 
 from products.models import Product
@@ -29,6 +28,9 @@ class ShoppingCart(models.Model):
         except OrderedProduct.DoesNotExist:
             return None
 
+    def __str__(self):
+        return str(self.id)
+
 
 class OrderedProduct(models.Model):
     """
@@ -50,5 +52,8 @@ class OrderedProduct(models.Model):
         constraints = [
             models.CheckConstraint(
                 check=models.Q(quantity__gte=1), name='product_quantity_is_natural_int'
+            ),
+            models.UniqueConstraint(
+                fields=['cart', 'product'], name='unique_product_for_cart'
             )
         ]

@@ -30,8 +30,8 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('quantity', models.PositiveSmallIntegerField(verbose_name='Products amount')),
                 ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Last updated at')),
-                ('cart', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ordered_products', to='shopping_cart.shoppingcart', verbose_name='Shopping cart')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ordered_products', to='products.product', verbose_name='Product in order')),
+                ('cart', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ordered_product', to='shopping_cart.shoppingcart', verbose_name='Shopping cart')),
+                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ordered_product', to='products.product', verbose_name='Product in order')),
             ],
             options={
                 'verbose_name': 'Ordered product',
