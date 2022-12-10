@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+
 from rest_framework.serializers import Serializer
 
 
@@ -23,6 +25,17 @@ class MultipleSerializerMixin:
         """
         if serializer_class := self.serializer_class.get(self.action):
             return serializer_class
-        for actions_tuple, serializer in self.serializer_class:
-            if self.action in actions_tuple:
+        for actions, serializer in self._get_compound_action_serializers().items():
+            if self.action in actions:
                 return serializer
+
+    def _get_compound_action_serializers(self) -> dict[Iterable, Serializer]:
+        """
+        Returns a dictionary with serializers for several actions.
+        """
+        return {
+            actions: serializer for actions, serializer in self.serializer_class.items()
+            if actions in filter(
+                lambda x: not isinstance(x, str) and isinstance(x, Iterable), self.serializer_class
+            )
+        }
