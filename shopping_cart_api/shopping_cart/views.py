@@ -4,7 +4,9 @@ from rest_framework.viewsets import GenericViewSet
 
 from multiple_serializers.mixin import MultipleSerializerMixin
 from shopping_cart.serializer import OrderedProductSerializer
-from shopping_cart.services.shopping_cart.services import add_products_to_cart_from_request
+from shopping_cart.services.ordered_product.services import create_ordered_products
+from shopping_cart.services.shopping_cart.services import get_or_create_shopping_cart_from_cookies, \
+    set_shopping_cart_id_cookie
 
 
 class ShoppingCartView(MultipleSerializerMixin, GenericViewSet):
@@ -28,6 +30,10 @@ class ShoppingCartView(MultipleSerializerMixin, GenericViewSet):
         """
         serializer: OrderedProductSerializer = self.get_serializer(data=request.data, many=True)
         serializer.is_valid(raise_exception=True)
-        return Response(self.get_serializer(
-            add_products_to_cart_from_request(serializer.validated_data, request), many=True
-        ).data)
+        cart = get_or_create_shopping_cart_from_cookies(request.COOKIES)
+        response = Response(
+            self.get_serializer(create_ordered_products(cart, serializer.validated_data), many=True).data,
+            status=201
+        )
+        set_shopping_cart_id_cookie(response.cookies, str(cart.pk))
+        return response

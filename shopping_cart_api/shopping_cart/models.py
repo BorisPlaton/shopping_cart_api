@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from products.models import Product
@@ -43,7 +44,7 @@ class OrderedProduct(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, verbose_name="Product in order", related_name='ordered_products'
     )
-    quantity = models.PositiveSmallIntegerField("Products amount")
+    quantity = models.IntegerField("Products amount", validators=[MinValueValidator(1)])
     updated_at = models.DateTimeField("Last updated at", auto_now=True)
 
     class Meta:
