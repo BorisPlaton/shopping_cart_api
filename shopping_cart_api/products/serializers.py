@@ -1,7 +1,10 @@
+from functools import cached_property
+
 from django.db.models import QuerySet
 from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 
+from eager_loaded_serializer.base import EagerLoadedSerializer
 from products.models import Category, Product
 
 
@@ -15,7 +18,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class TreeCategorySerializer(CategorySerializer):
+class TreeCategorySerializer(EagerLoadedSerializer, CategorySerializer):
     """
     Serializes categories as a tree structure. Starts from root to the leafs.
     """
@@ -25,17 +28,14 @@ class TreeCategorySerializer(CategorySerializer):
     class Meta(CategorySerializer.Meta):
         fields = CategorySerializer.Meta.fields + ['subcategories']
 
-    @staticmethod
-    def setup_eager_loading(queryset: QuerySet[Category]):
+    def setup_eager_loading(self, model: QuerySet[Category]):
         """
         Loads all subcategories to prevent the N+1 problem.
         """
-        return queryset.prefetch_related(
-            'subcategories__subcategories__subcategories'
-        )
+        return model.prefetch_related('subcategories__subcategories__subcategories')
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(EagerLoadedSerializer, serializers.ModelSerializer):
     """
     Serializes the Product model.
     """
@@ -50,14 +50,12 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
     @staticmethod
-    def setup_eager_loading(queryset: QuerySet[Category]):
+    def setup_eager_loading(model: QuerySet[Category]):
         """
         Loads all categories and their parent categories to prevent
         the N+1 problem.
         """
-        return queryset.prefetch_related(
-            'category__parent_category__parent_category'
-        )
+        return model.prefetch_related('category__parent_category__parent_category')
 
     def get_categories(self, obj: Product):
         def serialize_category(category: Category) -> list:

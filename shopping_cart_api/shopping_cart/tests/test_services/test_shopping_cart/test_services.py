@@ -27,6 +27,6 @@ class TestShoppingCartServices:
 
     def test_set_shopping_cart_id_cookie_updates_cookies_dict(self):
         cookies = {}
-        cart_id = 'some id'
-        set_shopping_cart_id_cookie(cookies, cart_id)
-        assert cookies['cart_id'] == cart_id
+        cart = baker.make(ShoppingCart)
+        set_shopping_cart_id_cookie(cookies, cart)
+        assert cookies['cart_id'] == str(cart.pk)

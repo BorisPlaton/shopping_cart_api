@@ -47,5 +47,5 @@ class TestUserView:
         response = api_client.post(
             reverse('authentication:user-contact-information', args=[user.pk]), contact_information
         )
+        assert response.status_code == 409
         assert response.data.keys() == {'detail'}
-        assert response.data['detail'] == f"User with `id` {user.pk} already has contact information."

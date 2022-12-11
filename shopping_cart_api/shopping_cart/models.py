@@ -13,6 +13,7 @@ class ShoppingCart(models.Model):
     """
 
     id = models.UUIDField("Cart id", primary_key=True, default=uuid.uuid4, editable=False)
+    products = models.ManyToManyField(Product, related_name="carts", through='OrderedProduct')
 
     class Meta:
         verbose_name = "Shopping cart"
@@ -25,7 +26,7 @@ class ShoppingCart(models.Model):
         have products, returns none.
         """
         try:
-            return self.ordered_products.latest('updated_at').updated_at
+            return self.orders.latest('updated_at').updated_at
         except OrderedProduct.DoesNotExist:
             return None
 
@@ -39,10 +40,12 @@ class OrderedProduct(models.Model):
     """
 
     cart = models.ForeignKey(
-        ShoppingCart, on_delete=models.CASCADE, verbose_name="Shopping cart", related_name='ordered_products'
+        ShoppingCart, on_delete=models.CASCADE, verbose_name="Shopping cart",
+        related_name='orders'
     )
     product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, verbose_name="Product in order", related_name='ordered_products'
+        Product, on_delete=models.CASCADE, verbose_name="Product in order",
+        related_name='orders'
     )
     quantity = models.IntegerField("Products amount", validators=[MinValueValidator(1)])
     updated_at = models.DateTimeField("Last updated at", auto_now=True)
