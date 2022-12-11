@@ -1,8 +1,8 @@
 from django.db import IntegrityError
 
-from authentication.exceptions import StateConflict
 from authentication.models import CustomUser, ContactInformation
 from authentication.services.selectors import get_user_by_pk
+from exceptions.http_exceptions import StateConflict
 
 
 def create_user(email: str, password: str, **kwargs):
@@ -21,4 +21,4 @@ def create_user_contact_information(user_pk: int, phone_number: str, location: s
     try:
         return ContactInformation.objects.create(user=user, phone_number=phone_number, location=location)
     except IntegrityError:
-        raise StateConflict("User with `id` %s already has contact information." % user_pk)
+        raise StateConflict("User with id %s already has contact information." % user_pk)

@@ -16,11 +16,11 @@ class CategoriesTreeView(APIView):
 
     def get(self, request: Request):
         """
-        Returns all categories and their descendants as
-        list of objects.
+        Returns all categories and their descendants as list of objects.
         """
-        eager_loaded_queryset = TreeCategorySerializer.setup_eager_loading(get_all_root_categories())
-        return Response(TreeCategorySerializer(eager_loaded_queryset, many=True).data)
+        return Response(
+            TreeCategorySerializer(get_all_root_categories(), many=True, eager_loading=True).data
+        )
 
 
 class ProductView(GenericViewSet):
@@ -45,5 +45,6 @@ class ProductView(GenericViewSet):
         Filters products by given conditions and returns list of them.
         If none was matched, returns an empty list.
         """
-        eager_loaded_queryset = ProductSerializer.setup_eager_loading(self.filter_queryset(self.get_queryset()))
-        return Response(ProductSerializer(eager_loaded_queryset, many=True).data)
+        return Response(ProductSerializer(
+            self.filter_queryset(self.get_queryset()), many=True, eager_loading=True
+        ).data)

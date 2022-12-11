@@ -3,24 +3,25 @@ from model_bakery import baker
 from rest_framework.exceptions import ValidationError
 
 from shopping_cart.models import OrderedProduct
-from shopping_cart.serializer import OrderedProductSerializer
+from shopping_cart.serializers import OrderedProductSerializer
 
 
 @pytest.mark.django_db
 class TestOrderedProductSerializer:
 
-    def test_ordered_product_is_deserialized_with_id_field(self):
-        ordered_product_data = {'product_id': 1, 'quantity': 2}
-        assert OrderedProductSerializer(data=ordered_product_data).is_valid()
+    def test_ordered_product_is_deserialized_with_slug_field(self):
+        ordered_product_data = {'slug': 'some-slug', 'quantity': 2}
+        serializer = OrderedProductSerializer(data=ordered_product_data)
+        assert serializer.is_valid()
+        assert serializer.validated_data.keys() == {'slug', 'quantity'}
 
     @pytest.mark.parametrize(
         'ordered_product_data',
         [
             {'quantity': 1},
-            {'product_id': 1},
-            {'product_id': -1, 'quantity': 2},
-            {'product_id': 1, 'quantity': 0},
-            {'product_id': 1, 'quantity': -1},
+            {'slug': 'some-slug'},
+            {'slug': 'some-slug', 'quantity': 0},
+            {'slug': 'some-slug', 'quantity': -1},
             {},
         ]
     )
@@ -28,8 +29,8 @@ class TestOrderedProductSerializer:
         with pytest.raises(ValidationError):
             OrderedProductSerializer(data=ordered_product_data).is_valid(raise_exception=True)
 
-    def test_serialization_fetch_related_product_id(self, create_product):
+    def test_serialization_fetch_related_product_slug(self, create_product):
         ordered_product = baker.make(OrderedProduct, quantity=2, product=create_product())
         serializer_data = OrderedProductSerializer(ordered_product).data
-        assert serializer_data.keys() == {'product_id', 'quantity'}
-        assert serializer_data['product_id'] == ordered_product.product.pk
+        assert serializer_data.keys() == {'slug', 'quantity'}
+        assert serializer_data['slug'] == ordered_product.product.slug

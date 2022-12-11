@@ -2,9 +2,9 @@ import pytest
 from model_bakery import baker
 from rest_framework.exceptions import NotFound
 
-from authentication.exceptions import StateConflict
 from authentication.models import CustomUser, ContactInformation
 from authentication.services.services import create_user, create_user_contact_information
+from exceptions.http_exceptions import StateConflict
 
 
 @pytest.mark.django_db
@@ -38,6 +38,5 @@ class TestContactInformationServices:
     def test_if_user_has_already_contact_information_exception_is_raised(self, contact_information):
         user = baker.make(CustomUser)
         create_user_contact_information(user.pk, **contact_information)
-        with pytest.raises(StateConflict) as e:
+        with pytest.raises(StateConflict):
             create_user_contact_information(user.pk, **contact_information)
-        assert str(e.value) == f"User with `id` {user.pk} already has contact information."
