@@ -1,19 +1,26 @@
+from django.db.models import QuerySet
+
+
 class EagerLoadedSerializer:
     """
     The base class for populating instance for serializing
     with db data.
     """
 
-    def __init__(self, instance=None, *args, eager_loading=False, **kwargs):
+    def __new__(cls, instance=None, *args, eager_loading=False, **kwargs):
         if eager_loading and instance is not None:
-            instance = self.setup_eager_loading(instance)
-        super().__init__(instance, *args, **kwargs)
+            instance = cls.setup_eager_loading(instance, kwargs.get('many', False))
+        return super().__new__(cls, instance, *args, **kwargs)
 
-    def setup_eager_loading(self, model):
+    def __init__(self, *args, eager_loading=False, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def setup_eager_loading(value: QuerySet, many: bool):
         """
-        This method is called when the model is populated with data. It must
-        return `instance` argument.
+        This method is called when the queryset must be populated with data.
+        It must return the same `value` argument.
         """
         raise NotImplementedError(
-            "You haven't implemented the `setup_eager_loading` method for populating a model."
+            "You haven't implemented the `setup_eager_loading` method for the data populating."
         )

@@ -1,5 +1,3 @@
-from functools import cached_property
-
 from django.db.models import QuerySet
 from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
@@ -28,11 +26,12 @@ class TreeCategorySerializer(EagerLoadedSerializer, CategorySerializer):
     class Meta(CategorySerializer.Meta):
         fields = CategorySerializer.Meta.fields + ['subcategories']
 
-    def setup_eager_loading(self, model: QuerySet[Category]):
+    @staticmethod
+    def setup_eager_loading(value: QuerySet[Category], many):
         """
         Loads all subcategories to prevent the N+1 problem.
         """
-        return model.prefetch_related('subcategories__subcategories__subcategories')
+        return value.prefetch_related('subcategories__subcategories__subcategories')
 
 
 class ProductSerializer(EagerLoadedSerializer, serializers.ModelSerializer):
@@ -50,12 +49,12 @@ class ProductSerializer(EagerLoadedSerializer, serializers.ModelSerializer):
         ]
 
     @staticmethod
-    def setup_eager_loading(model: QuerySet[Category]):
+    def setup_eager_loading(value: QuerySet[Category] | Category, many):
         """
         Loads all categories and their parent categories to prevent
         the N+1 problem.
         """
-        return model.prefetch_related('category__parent_category__parent_category')
+        return value.prefetch_related('category__parent_category__parent_category')
 
     def get_categories(self, obj: Product):
         def serialize_category(category: Category) -> list:

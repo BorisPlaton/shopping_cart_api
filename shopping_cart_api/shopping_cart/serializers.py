@@ -49,11 +49,14 @@ class ShoppingCartSerializer(EagerLoadedSerializer, serializers.ModelSerializer)
         model = ShoppingCart
         fields = ['pk', 'orders']
 
-    def setup_eager_loading(self, model: ShoppingCart):
+    @staticmethod
+    def setup_eager_loading(value: ShoppingCart, many):
         """
         Prefetches db model data to reduce the number of queries when
         a user has many ordered products.
         """
-        prefetch_related_objects([model], 'orders__product')
-        # ProductSerializer.setup_eager_loading(model.products)
-        return model
+        if not many:
+            prefetch_related_objects(
+                [value], 'orders__product__category__parent_category__parent_category__parent_category'
+            )
+        return value
