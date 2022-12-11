@@ -1,7 +1,7 @@
 from django.db.models import QuerySet
 
 
-class EagerLoadedSerializer:
+class EagerLoadedSerializerMixin:
     """
     The base class for populating instance for serializing
     with db data.
