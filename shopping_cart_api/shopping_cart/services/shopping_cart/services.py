@@ -1,5 +1,4 @@
-from django.core.exceptions import ValidationError
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 
 from shopping_cart.models import ShoppingCart
 from shopping_cart.services.shopping_cart.cart_cookie_manager import CartCookieManager

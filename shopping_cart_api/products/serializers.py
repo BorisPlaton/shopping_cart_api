@@ -2,7 +2,7 @@ from django.db.models import QuerySet
 from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 
-from eager_loaded_serializer.base import EagerLoadedSerializer
+from eager_loaded_serializer.mixin import EagerLoadedSerializerMixin
 from products.models import Category, Product
 
 
@@ -16,7 +16,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class TreeCategorySerializer(EagerLoadedSerializer, CategorySerializer):
+class TreeCategorySerializer(EagerLoadedSerializerMixin, CategorySerializer):
     """
     Serializes categories as a tree structure. Starts from root to the leafs.
     """
@@ -34,7 +34,7 @@ class TreeCategorySerializer(EagerLoadedSerializer, CategorySerializer):
         return value.prefetch_related('subcategories__subcategories__subcategories')
 
 
-class ProductSerializer(EagerLoadedSerializer, serializers.ModelSerializer):
+class ProductSerializer(EagerLoadedSerializerMixin, serializers.ModelSerializer):
     """
     Serializes the Product model.
     """

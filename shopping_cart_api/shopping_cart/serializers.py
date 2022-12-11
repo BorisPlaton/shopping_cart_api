@@ -1,7 +1,7 @@
 from django.db.models import prefetch_related_objects
 from rest_framework import serializers
 
-from eager_loaded_serializer.base import EagerLoadedSerializer
+from eager_loaded_serializer.mixin import EagerLoadedSerializerMixin
 from products.serializers import ProductSerializer
 from shopping_cart.models import OrderedProduct, ShoppingCart
 
@@ -38,7 +38,7 @@ class ShoppingCartProductSerializer(serializers.ModelSerializer):
         fields = ['quantity', 'product']
 
 
-class ShoppingCartSerializer(EagerLoadedSerializer, serializers.ModelSerializer):
+class ShoppingCartSerializer(EagerLoadedSerializerMixin, serializers.ModelSerializer):
     """
     The serializer for shopping cart with list of ordered products.
     """
@@ -55,8 +55,7 @@ class ShoppingCartSerializer(EagerLoadedSerializer, serializers.ModelSerializer)
         Prefetches db model data to reduce the number of queries when
         a user has many ordered products.
         """
-        if not many:
-            prefetch_related_objects(
-                [value], 'orders__product__category__parent_category__parent_category__parent_category'
-            )
+        prefetch_related_objects(
+            [value], 'orders__product__category__parent_category__parent_category__parent_category'
+        )
         return value
