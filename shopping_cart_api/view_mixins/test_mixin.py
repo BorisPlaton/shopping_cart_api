@@ -1,19 +1,19 @@
 from unittest.mock import patch, MagicMock
 
-from multiple_serializers.mixin import MultipleSerializerMixin
+from view_mixins.mixins.multiple_serializers import MultipleSerializerMixin
 
 
 class TestMultipleSerializerMixin:
 
-    @patch.dict('multiple_serializers.mixin.__builtins__', {'super': lambda: MagicMock()})
+    @patch.dict('view_mixins.mixins.multiple_serializers.__builtins__', {'super': lambda: MagicMock()})
     def test_if_serializer_class_is_not_dict_returns_what_returns_parent_method(self):
         assert isinstance(MultipleSerializerMixin().get_serializer_class(), MagicMock)
 
     @patch.dict(
-        'multiple_serializers.mixin.__builtins__',
+        'view_mixins.mixins.multiple_serializers.__builtins__',
         {'super': lambda: type('class', (), {'get_serializer_class': lambda: {}})}
     )
-    @patch('multiple_serializers.mixin.MultipleSerializerMixin._get_serializer_from_dict')
+    @patch('view_mixins.mixins.multiple_serializers.MultipleSerializerMixin._get_serializer_from_dict')
     def test_if_parent_method_returns_dict_it_will_call_method_for_it(self, mocked_method):
         return_value = 'serializer from dict'
         mocked_method.return_value = return_value

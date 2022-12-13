@@ -2,8 +2,10 @@ import json
 
 import pytest
 from django.urls import reverse
+from model_bakery import baker
 
-from shopping_cart.models import ShoppingCart
+from products.models import Product
+from shopping_cart.models import ShoppingCart, OrderedProduct
 
 
 @pytest.mark.django_db
@@ -11,7 +13,11 @@ class TestShoppingCartView:
 
     @pytest.fixture
     def serialized_ordered_product(self, create_product):
-        return {'slug': create_product().slug, 'quantity': 2}
+        return self.serialize_order(create_product().slug, 2)
+
+    @staticmethod
+    def serialize_order(slug: str, quantity: int):
+        return {'slug': slug, 'quantity': quantity}
 
     def test_cookie_with_shopping_cart_id_is_created_when_post_request_is_sent(
             self, serialized_ordered_product, api_client
@@ -40,3 +46,76 @@ class TestShoppingCartView:
         shopping_cart = ShoppingCart.objects.get(pk=response.cookies['cart_id'].value)
         ordered_product = shopping_cart.orders.get(product__slug=serialized_ordered_product['slug'])
         assert ordered_product.quantity == serialized_ordered_product['quantity']
+
+    def test_update_product_quantity_returns_response_with_404_status_code_if_cart_doesnt_exist(
+            self, api_client, serialized_ordered_product
+    ):
+        response = api_client.patch(
+            reverse('shopping_cart:cart-products-quantity'), json.dumps([serialized_ordered_product]),
+            content_type='application/json'
+        )
+        assert response.status_code == 404
+
+    def test_if_send_duplicated_products_response_with_400_status_code_is_returned(
+            self, api_client, serialized_ordered_product
+    ):
+        response = api_client.patch(
+            reverse('shopping_cart:cart-products-quantity'),
+            json.dumps([serialized_ordered_product, serialized_ordered_product]),
+            content_type='application/json'
+        )
+        assert response.status_code == 400
+
+    def test_if_send_dict_instead_of_list_response_with_status_code_400_returned(
+            self, api_client, serialized_ordered_product
+    ):
+        response = api_client.patch(
+            reverse('shopping_cart:cart-products-quantity'),
+            json.dumps(serialized_ordered_product),
+            content_type='application/json'
+        )
+        assert response.status_code == 400
+
+    def test_patch_request_updates_products_quantity_in_cart(self, api_client, create_product):
+        product_quantity = 2
+        altered_product_quantity = product_quantity + 2
+        ordered_product = baker.make(
+            OrderedProduct, product=create_product(), quantity=product_quantity
+        )
+        serialized_ordered_product = self.serialize_order(
+            ordered_product.product.slug, altered_product_quantity
+        )
+        api_client.cookies['cart_id'] = str(ordered_product.cart.pk)
+        response = api_client.patch(
+            reverse('shopping_cart:cart-products-quantity'),
+            json.dumps([serialized_ordered_product]),
+            content_type='application/json'
+        )
+        ordered_product.refresh_from_db()
+        assert response.status_code == 200
+        assert ordered_product.quantity == altered_product_quantity
+
+    def test_delete_multiple_products_with_the_same_slug_returns_400_error(self, api_client):
+        response = api_client.patch(
+            reverse('shopping_cart:cart-products-quantity'),
+            json.dumps([{'slug': 'slug'}, {'slug': 'slug'}]),
+            content_type='application/json'
+        )
+        assert response.status_code == 400
+
+    def test_delete_request_deletes_products_from_cart(self, api_client, create_product):
+        ordered_product = baker.make(
+            OrderedProduct, product=create_product(), quantity=1
+        )
+        api_client.cookies['cart_id'] = str(ordered_product.cart.pk)
+        assert ordered_product.cart.products.count() == 1
+        response = api_client.patch(
+            reverse('shopping_cart:cart-delete-products'),
+            json.dumps([{'slug': ordered_product.product.slug}]),
+            content_type='application/json'
+        )
+        assert response.status_code == 200
+        assert isinstance(response.data, dict)
+        assert response.data['amount'] == 1
+        assert ordered_product.cart.products.all().count() == 0
+        assert Product.objects.get(slug=ordered_product.product.slug) == ordered_product.product

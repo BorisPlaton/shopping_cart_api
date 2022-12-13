@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet
 from rest_framework.exceptions import NotFound, ValidationError as RestValidationError
 
 from shopping_cart.models import ShoppingCart
@@ -26,7 +25,7 @@ def get_shopping_cart_id_from_cookies(request_cookies: dict):
     return cart_cookie_manager.get_shopping_cart_id()
 
 
-def get_shopping_cart_by_id(shopping_cart_id: str):
+def get_shopping_cart_by_id(shopping_cart_id: str) -> ShoppingCart:
     """
     Returns the shopping cart by its id. If none, raises exception.
     """
@@ -36,10 +35,3 @@ def get_shopping_cart_by_id(shopping_cart_id: str):
         raise NotFound("Shopping cart with id %s doesn't exist." % shopping_cart_id)
     except (ValidationError, ValueError):
         raise RestValidationError("Your cookie with cart id %s is invalid" % shopping_cart_id)
-
-
-def get_all_shopping_carts() -> QuerySet[ShoppingCart]:
-    """
-    Returns all shopping carts.
-    """
-    return ShoppingCart.objects.all()

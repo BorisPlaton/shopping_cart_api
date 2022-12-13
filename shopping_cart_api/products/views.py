@@ -28,7 +28,7 @@ class ProductView(GenericViewSet):
     Handles the Product model.
     """
 
-    queryset = get_all_products()
+    queryset = True
     serializer_class = ProductSerializer
     filterset_class = ProductFilter
     lookup_field = 'slug'
@@ -46,5 +46,5 @@ class ProductView(GenericViewSet):
         If none was matched, returns an empty list.
         """
         return Response(ProductSerializer(
-            self.filter_queryset(self.get_queryset()), many=True, eager_loading=True
+            self.filter_queryset(get_all_products()), many=True, eager_loading=True
         ).data)

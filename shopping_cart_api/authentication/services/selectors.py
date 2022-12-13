@@ -3,13 +3,6 @@ from rest_framework.exceptions import NotFound
 from authentication.models import CustomUser
 
 
-def get_all_users():
-    """
-    Returns all users that are stored in the db.
-    """
-    return CustomUser.objects.all()
-
-
 def get_user_by_pk(pk: int) -> CustomUser:
     """
     Gets a user model or raises 404 exception.

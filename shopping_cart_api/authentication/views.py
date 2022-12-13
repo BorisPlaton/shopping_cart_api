@@ -4,17 +4,16 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from authentication.serializers import UserSerializer, ContactInformationSerializer
-from authentication.services.selectors import get_all_users
 from authentication.services.services import create_user_contact_information
-from multiple_serializers.mixin import MultipleSerializerMixin
+from view_mixins.mixins.compounds import CompoundMixin
 
 
-class UserView(MultipleSerializerMixin, GenericViewSet):
+class UserView(CompoundMixin, GenericViewSet):
     """
     Handles the User model.
     """
 
-    queryset = get_all_users()
+    queryset = True
     serializer_class = {
         'create': UserSerializer,
         'contact_information': ContactInformationSerializer,
@@ -24,8 +23,7 @@ class UserView(MultipleSerializerMixin, GenericViewSet):
         """
         Registers a new user model with given credentials.
         """
-        serializer: UserSerializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer = self.get_request_serializer(data=request.data)
         created_user = serializer.create(serializer.validated_data)
         return Response(self.get_serializer(created_user).data, status=201)
 
@@ -34,7 +32,6 @@ class UserView(MultipleSerializerMixin, GenericViewSet):
         """
         Adds contact information to the specific user.
         """
-        serializer: ContactInformationSerializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        contact_information = create_user_contact_information(pk, **serializer.validated_data)
+        validated_data = self.get_request_data(data=request.data)
+        contact_information = create_user_contact_information(pk, **validated_data)
         return Response(self.get_serializer(contact_information).data, status=201)
