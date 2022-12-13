@@ -72,7 +72,7 @@ class ShoppingCartSerializer(EagerLoadedSerializerMixin, serializers.ModelSerial
     The serializer for shopping cart with list of ordered products.
     """
 
-    orders = ShoppingCartProductSerializer(many=True)
+    orders = ShoppingCartProductSerializer(many=True, read_only=True)
 
     class Meta:
         model = ShoppingCart

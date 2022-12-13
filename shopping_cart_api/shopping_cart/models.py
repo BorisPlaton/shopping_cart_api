@@ -4,6 +4,7 @@ from datetime import datetime
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from authentication.models import ContactInformation
 from products.models import Product
 
 
@@ -26,7 +27,7 @@ class ShoppingCart(models.Model):
         have products, returns none.
         """
         try:
-            return self.orders.latest('updated_at').updated_at
+            return self.ordered_products.latest('updated_at').updated_at
         except OrderedProduct.DoesNotExist:
             return None
 
@@ -41,11 +42,11 @@ class OrderedProduct(models.Model):
 
     cart = models.ForeignKey(
         ShoppingCart, on_delete=models.CASCADE, verbose_name="Shopping cart",
-        related_name='orders'
+        related_name='ordered_products'
     )
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, verbose_name="Product in order",
-        related_name='orders'
+        related_name='ordered_products'
     )
     quantity = models.IntegerField("Products amount", validators=[MinValueValidator(1)])
     updated_at = models.DateTimeField("Last updated at", auto_now=True)
@@ -61,3 +62,22 @@ class OrderedProduct(models.Model):
                 fields=['cart', 'product'], name='unique_product_for_cart'
             )
         ]
+
+
+class Order(models.Model):
+    """
+    The model stores information about the user order.
+    """
+
+    cart = models.OneToOneField(
+        ShoppingCart, related_name='order', on_delete=models.PROTECT,
+        verbose_name="Cart with products"
+    )
+    contact_info = models.ForeignKey(
+        ContactInformation, related_name='orders', on_delete=models.PROTECT,
+        verbose_name="Customer information"
+    )
+
+    class Meta:
+        verbose_name = "Order"
+        verbose_name_plural = "Orders"

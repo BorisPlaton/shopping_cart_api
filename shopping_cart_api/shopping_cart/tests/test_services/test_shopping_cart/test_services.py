@@ -45,7 +45,7 @@ class TestShoppingCartServices:
             for ordered_product in ordered_products
         ]
         update_products_quantity_in_cart(cart, serialized_ordered_products)
-        for product in cart.orders.all():
+        for product in cart.ordered_products.all():
             assert product.quantity == ordered_product_quantity
 
     def test_update_products_quantity_changes_their_quantity_field(self, create_product):
@@ -61,7 +61,7 @@ class TestShoppingCartServices:
             for ordered_product in ordered_products
         ]
         update_products_quantity_in_cart(cart, serialized_ordered_products)
-        for product in cart.orders.all():
+        for product in cart.ordered_products.all():
             assert product.quantity == altered_product_quantity
 
     def test_delete_products_from_cart_deletes_them_by_slug(self, create_product):
@@ -71,8 +71,8 @@ class TestShoppingCartServices:
             OrderedProduct, cart=cart, product=lambda: create_product(),
             quantity=ordered_product_amount, _quantity=ordered_product_amount
         )
-        assert cart.orders.count() == ordered_product_amount
+        assert cart.ordered_products.count() == ordered_product_amount
         delete_products_from_shopping_cart(cart, [{'slug': ordered_products[0].product.slug}])
-        assert cart.orders.count() == ordered_product_amount - 1
-        assert not cart.orders.filter(product__slug=ordered_products[0].product.slug).exists()
+        assert cart.ordered_products.count() == ordered_product_amount - 1
+        assert not cart.ordered_products.filter(product__slug=ordered_products[0].product.slug).exists()
         assert Product.objects.filter(slug=ordered_products[0].product.slug).exists()

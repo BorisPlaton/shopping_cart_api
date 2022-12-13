@@ -1,8 +1,5 @@
-from django.db import IntegrityError
-
 from authentication.models import CustomUser, ContactInformation
 from authentication.services.selectors import get_user_by_pk
-from exceptions.http_exceptions import StateConflict
 
 
 def create_user(email: str, password: str, **kwargs):
@@ -13,12 +10,19 @@ def create_user(email: str, password: str, **kwargs):
     return CustomUser.objects.create_user(email, password, **kwargs)
 
 
-def create_user_contact_information(user_pk: int, phone_number: str, location: str):
+def update_or_create_contact_information(user_pk: int, contact_information: dict) -> tuple[ContactInformation, bool]:
     """
-    Creates contact information for the already existing user.
+    Creates contact information for the already existing user. If
+    contact information already exists, updates it.
     """
     user = get_user_by_pk(user_pk)
-    try:
-        return ContactInformation.objects.create(user=user, phone_number=phone_number, location=location)
-    except IntegrityError:
-        raise StateConflict("User with id %s already has contact information." % user_pk)
+    if not user.contact_info:
+        user.contact_info = ContactInformation.objects.create(**contact_information)
+        user.save()
+        is_created = True
+    else:
+        for field, value in contact_information.items():
+            setattr(user.contact_info, field, value)
+        user.contact_info.save()
+        is_created = False
+    return user.contact_info, is_created

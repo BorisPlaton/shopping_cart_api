@@ -28,24 +28,26 @@ class TestUserView:
         response = api_client.post(reverse('authentication:user-list'), user_credentials_for_registration)
         assert response.status_code == 400
 
-    def test_user_contact_information_is_created_via_post_request(self, api_client, contact_information):
+    def test_user_contact_information_is_created_via_put_request(self, api_client, contact_information):
         user = baker.make(CustomUser)
-        response = api_client.post(
-            reverse('authentication:user-contact-information', args=[user.pk]), contact_information
+        response = api_client.put(
+            reverse('authentication:user-detail', args=[user.pk]), contact_information
         )
         response_data = response.data
         assert response_data.keys() == {'id', 'location', 'phone_number'}
+        user.refresh_from_db()
         assert response_data.pop('id') == user.contact_info.pk
+        assert response.status_code == 201
         for field, value in response.data.items():
             assert contact_information[field] == value
 
     def test_second_contact_information_creation_will_cause_an_exception(self, api_client, contact_information):
         user = baker.make(CustomUser)
-        api_client.post(
-            reverse('authentication:user-contact-information', args=[user.pk]), contact_information
+        api_client.put(
+            reverse('authentication:user-detail', args=[user.pk]), contact_information
         )
-        response = api_client.post(
-            reverse('authentication:user-contact-information', args=[user.pk]), contact_information
+        response = api_client.put(
+            reverse('authentication:user-detail', args=[user.pk]), contact_information
         )
-        assert response.status_code == 409
-        assert response.data.keys() == {'detail'}
+        assert response.status_code == 200
+        assert response.data.keys() == {'id', 'location', 'phone_number'}

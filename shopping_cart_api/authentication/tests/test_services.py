@@ -3,8 +3,7 @@ from model_bakery import baker
 from rest_framework.exceptions import NotFound
 
 from authentication.models import CustomUser, ContactInformation
-from authentication.services.services import create_user, create_user_contact_information
-from exceptions.http_exceptions import StateConflict
+from authentication.services.services import create_user, update_or_create_contact_information
 
 
 @pytest.mark.django_db
@@ -26,17 +25,20 @@ class TestContactInformationServices:
     def test_if_user_doesnt_exist_contact_information_will_not_be_created(self, contact_information):
         assert not ContactInformation.objects.all().exists()
         with pytest.raises(NotFound):
-            create_user_contact_information(1, **contact_information)
+            update_or_create_contact_information(1, contact_information)
         assert not ContactInformation.objects.all().exists()
 
     def test_contact_information_is_successfully_created_if_user_exists(self, contact_information):
         user = baker.make(CustomUser)
         assert not ContactInformation.objects.all().exists()
-        contact_info = create_user_contact_information(user.pk, **contact_information)
+        contact_info, is_created = update_or_create_contact_information(user.pk, contact_information)
+        user.refresh_from_db()
         assert user.contact_info == contact_info
+        assert is_created
 
-    def test_if_user_has_already_contact_information_exception_is_raised(self, contact_information):
-        user = baker.make(CustomUser)
-        create_user_contact_information(user.pk, **contact_information)
-        with pytest.raises(StateConflict):
-            create_user_contact_information(user.pk, **contact_information)
+    def test_if_user_has_already_contact_information_it_will_be_updated(self, contact_information):
+        user = baker.make(CustomUser, contact_info=baker.make(ContactInformation, phone_number="+441234567822"))
+        contact_info, is_created = update_or_create_contact_information(user.pk, contact_information)
+        assert not is_created
+        assert contact_information['phone_number'] == contact_info.phone_number
+        assert contact_information['location'] == contact_info.location

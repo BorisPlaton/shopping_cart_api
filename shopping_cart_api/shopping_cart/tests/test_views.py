@@ -44,7 +44,7 @@ class TestShoppingCartView:
             content_type='application/json'
         )
         shopping_cart = ShoppingCart.objects.get(pk=response.cookies['cart_id'].value)
-        ordered_product = shopping_cart.orders.get(product__slug=serialized_ordered_product['slug'])
+        ordered_product = shopping_cart.ordered_products.get(product__slug=serialized_ordered_product['slug'])
         assert ordered_product.quantity == serialized_ordered_product['quantity']
 
     def test_update_product_quantity_returns_response_with_404_status_code_if_cart_doesnt_exist(

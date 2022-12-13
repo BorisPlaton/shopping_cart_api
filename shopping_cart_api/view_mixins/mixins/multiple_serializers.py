@@ -28,6 +28,7 @@ class MultipleSerializerMixin:
         for actions, serializer in self._get_compound_action_serializers().items():
             if self.action in actions:
                 return serializer
+        raise ValueError(f"You haven't specified a serializer for the {self.action} action.")
 
     def _get_compound_action_serializers(self) -> dict[Iterable, Serializer]:
         """

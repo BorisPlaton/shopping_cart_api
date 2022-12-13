@@ -1,4 +1,5 @@
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -80,3 +81,19 @@ class UserOrdersView(CompoundMixin, GenericViewSet):
     """
 
     queryset = True
+    serializer_class = {
+        'create': ShoppingCartSerializer,
+    }
+
+    def create(self, request: Request):
+        """
+        Creates a new order for the not authenticated user. Additional
+        credentials are required.
+        """
+
+    @action(methods=['post'], permission_classes=[IsAuthenticated], detail=True)
+    def authenticated(self):
+        """
+        Creates a new order for the authenticated user. Contact
+        information is retrieved from the user model.
+        """

@@ -7,6 +7,7 @@ app_name = 'shopping_cart'
 router = DefaultRouter()
 router.include_root_view = False
 router.register('', views.ShoppingCartView, basename='cart')
+router.register('orders', views.UserOrdersView, basename='order')
 
 urlpatterns = [
     *router.urls,
