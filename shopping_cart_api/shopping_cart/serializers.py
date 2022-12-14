@@ -6,7 +6,7 @@ from rest_framework.serializers import ListSerializer
 from authentication.serializers import ContactInformationSerializer
 from eager_loaded_serializer.mixin import EagerLoadedSerializerMixin
 from products.serializers import ProductSerializer
-from shopping_cart.models import OrderedProduct, ShoppingCart
+from shopping_cart.models import OrderedProduct, ShoppingCart, Order
 
 
 class MultipleOrderedProductSerializer(ListSerializer):
@@ -91,10 +91,30 @@ class ShoppingCartSerializer(EagerLoadedSerializerMixin, serializers.ModelSerial
         return value
 
 
-class OrderSerializer(ContactInformationSerializer):
+class OrderInfoSerializer(ContactInformationSerializer):
+    """
+    The serializer for the additional information about an order.
+    """
 
     def to_internal_value(self, data):
         data = super().to_internal_value(data)
         data['delivery_place'] = data.pop('location')
         data['customer_phone'] = data.pop('phone_number')
         return data
+
+
+class OrderWithProductsSerializer(EagerLoadedSerializerMixin, ContactInformationSerializer):
+    """
+    Serializer with the order information and ordered products.
+    """
+
+    cart = ShoppingCartSerializer()
+
+    class Meta:
+        model = Order
+        fields = ['pk', 'customer_phone', 'delivery_place', 'cart']
+
+    @staticmethod
+    def setup_eager_loading(value: Order, many: bool):
+        ShoppingCartSerializer.setup_eager_loading(value.cart, False)
+        return value

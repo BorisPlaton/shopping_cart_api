@@ -125,7 +125,7 @@ class TestShoppingCartView:
         )
         api_client.cookies['cart_id'] = str(ordered_product.cart.pk)
         assert ordered_product.cart.products.count() == 1
-        response = api_client.patch(
+        response = api_client.delete(
             reverse('shopping_cart:cart-delete-products'),
             json.dumps([{'slug': ordered_product.product.slug}]),
             content_type='application/json'
@@ -141,14 +141,14 @@ class TestShoppingCartView:
 class TestUserOrdersView:
 
     def test_create_new_order_if_no_cart_404_status_code_returned(self, api_client):
-        response = api_client.post(reverse('shopping_cart:order-list'))
+        response = api_client.post(reverse('shopping_cart:order-create'))
         assert response.status_code == 404
 
     def test_if_no_ordered_products_in_cart_400_status_code_returned(self, api_client, phone_number):
         cart = baker.make(ShoppingCart)
         api_client.cookies['cart_id'] = str(cart.pk)
         response = api_client.post(
-            reverse('shopping_cart:order-list'),
+            reverse('shopping_cart:order-create'),
             json.dumps({'location': 'NY', 'phone_number': phone_number}),
             content_type='application/json'
         )
@@ -157,10 +157,11 @@ class TestUserOrdersView:
     def test_order_set_new_cart_id_and_returns_201_status_code(self, api_client, phone_number, create_product):
         cart = baker.make(ShoppingCart)
         baker.make(OrderedProduct, cart=cart, product=create_product(), quantity=1)
+        baker.make(OrderedProduct, cart=cart, product=create_product(), quantity=3)
         old_cart_id = str(cart.pk)
         api_client.cookies['cart_id'] = old_cart_id
         response = api_client.post(
-            reverse('shopping_cart:order-list'),
+            reverse('shopping_cart:order-create'),
             json.dumps({'location': 'NY', 'phone_number': phone_number}),
             content_type='application/json'
         )

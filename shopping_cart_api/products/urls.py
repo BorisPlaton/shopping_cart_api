@@ -7,7 +7,7 @@ from products import views
 app_name = 'products'
 router = DefaultRouter()
 router.include_root_view = False
-router.register('products', views.ProductView, basename='product')
+router.register('', views.ProductView, basename='product')
 
 urlpatterns = [
     path('categories/', views.CategoriesTreeView.as_view(), name='categories-list'),

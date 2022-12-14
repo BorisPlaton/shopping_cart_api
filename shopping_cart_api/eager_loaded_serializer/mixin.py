@@ -1,6 +1,3 @@
-from django.db.models import QuerySet
-
-
 class EagerLoadedSerializerMixin:
     """
     The base class for populating instance for serializing
@@ -16,7 +13,7 @@ class EagerLoadedSerializerMixin:
         super().__init__(*args, **kwargs)
 
     @staticmethod
-    def setup_eager_loading(value: QuerySet, many: bool):
+    def setup_eager_loading(value, many: bool):
         """
         This method is called when the queryset must be populated with data.
         It must return the same `value` argument.

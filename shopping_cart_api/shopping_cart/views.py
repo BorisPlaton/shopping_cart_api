@@ -1,6 +1,7 @@
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from shopping_cart.services.cookies.selectors import get_shopping_cart_from_cookies
@@ -8,7 +9,7 @@ from shopping_cart.services.cookies.services import get_or_create_shopping_cart_
 from shopping_cart.services.responses import get_response_with_shopping_cart_cookie_id
 from view_mixins.mixins.compounds import CompoundMixin
 from shopping_cart.serializers import (
-    OrderedProductSerializer, ShoppingCartSerializer, SpecificOrderedProductSerializer
+    OrderedProductSerializer, ShoppingCartSerializer, SpecificOrderedProductSerializer, OrderWithProductsSerializer
 )
 from shopping_cart.services.orders.services import (
     create_ordered_product, create_new_order, get_order_data_from_request
@@ -65,7 +66,7 @@ class ShoppingCartView(CompoundMixin, GenericViewSet):
         )
         return Response(self.get_serializer(altered_products, many=True).data)
 
-    @action(methods=['patch'], detail=False, url_path='products')
+    @action(methods=['delete'], detail=False, url_path='products')
     def delete_products(self, request: Request):
         """
         Deletes products from the shopping cart.
@@ -77,15 +78,12 @@ class ShoppingCartView(CompoundMixin, GenericViewSet):
         return Response({'amount': deleted_products_amount})
 
 
-class UserOrdersView(GenericViewSet):
+class UserOrdersView(APIView):
     """
     The view class is responsible for user orders.
     """
 
-    queryset = True
-    serializer_class = ShoppingCartSerializer
-
-    def create(self, request: Request):
+    def post(self, request: Request):
         """
         Creates a new order with given additional data. After this,
         a new shopping cart will be created.
@@ -96,6 +94,6 @@ class UserOrdersView(GenericViewSet):
         )
         return get_response_with_shopping_cart_cookie_id(
             create_shopping_cart(),
-            self.get_serializer(created_order).data,
+            OrderWithProductsSerializer(created_order, eager_loading=True).data,
             status=201
         )

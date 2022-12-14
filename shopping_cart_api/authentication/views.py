@@ -1,3 +1,4 @@
+from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -15,7 +16,7 @@ class UserView(CompoundMixin, GenericViewSet):
     queryset = True
     serializer_class = {
         'create': UserSerializer,
-        'update': ContactInformationSerializer,
+        'contact_information': ContactInformationSerializer,
     }
 
     def create(self, request: Request):
@@ -26,7 +27,8 @@ class UserView(CompoundMixin, GenericViewSet):
         created_user = serializer.create(serializer.validated_data)
         return Response(self.get_serializer(created_user).data, status=201)
 
-    def update(self, request: Request, pk: int):
+    @action(methods=['put'], detail=True)
+    def contact_information(self, request: Request, pk: int):
         """
         Updates or creates the contact information of specific user.
         """

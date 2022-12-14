@@ -7,7 +7,7 @@ from rest_framework.request import Request
 from exceptions.http_exceptions import StateConflict
 from products.services.selectors import get_product_by_slug
 from shopping_cart.models import ShoppingCart, OrderedProduct, Order
-from shopping_cart.serializers import OrderSerializer
+from shopping_cart.serializers import OrderInfoSerializer
 
 
 class OrderData(TypedDict):
@@ -58,9 +58,9 @@ def get_order_data_from_request(request: Request) -> OrderData:
     if as an order data. If none, raises an exception.
     """
     if request.data:
-        serializer = OrderSerializer(data=request.data)
+        serializer = OrderInfoSerializer(data=request.data)
     elif request.user.is_authenticated and request.user.contact_info:
-        serializer = OrderSerializer(data=OrderSerializer(request.user.contact_info).data)
+        serializer = OrderInfoSerializer(data=OrderInfoSerializer(request.user.contact_info).data)
     else:
         raise NotFound("The order data hasn't been found.")
     serializer.is_valid(raise_exception=True)
