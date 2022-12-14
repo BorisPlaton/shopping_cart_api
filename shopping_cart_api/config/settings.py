@@ -101,6 +101,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -149,3 +150,7 @@ if DEBUG:
     INTERNAL_IPS = ["127.0.0.1", "localhost", "[::1]"]
     INSTALLED_APPS.append('debug_toolbar')
     MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+    DEBUG_TOOLBAR_PANELS = [
+        'debug_toolbar.panels.history.HistoryPanel',
+        'debug_toolbar.panels.sql.SQLPanel',
+    ]
