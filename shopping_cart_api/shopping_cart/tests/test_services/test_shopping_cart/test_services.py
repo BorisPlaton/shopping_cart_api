@@ -4,8 +4,7 @@ from model_bakery import baker
 from products.models import Product
 from shopping_cart.models import ShoppingCart, OrderedProduct
 from shopping_cart.services.shopping_cart.services import (
-    create_shopping_cart, get_or_create_shopping_cart_from_cookies, set_shopping_cart_id_cookie,
-    update_products_quantity_in_cart, delete_products_from_shopping_cart
+    create_shopping_cart, update_products_quantity_in_cart, delete_products_from_shopping_cart
 )
 
 
@@ -15,23 +14,6 @@ class TestShoppingCartServices:
     def test_create_shopping_cart_creates_new_record(self):
         shopping_cart = create_shopping_cart()
         assert isinstance(shopping_cart, ShoppingCart)
-
-    def test_get_or_create_shopping_cart_from_cookies_returns_shopping_cart_from_cookie(self):
-        shopping_cart = baker.make(ShoppingCart)
-        request_cookies = {'cart_id': str(shopping_cart.pk)}
-        assert get_or_create_shopping_cart_from_cookies(request_cookies) == shopping_cart
-
-    def test_get_or_create_shopping_cart_from_cookies_creates_if_cart_id_is_wrong(self):
-        request_cookies = {'cart_id': 'wrong-id'}
-        shopping_cart = get_or_create_shopping_cart_from_cookies(request_cookies)
-        assert isinstance(shopping_cart, ShoppingCart)
-        assert request_cookies['cart_id'] != str(shopping_cart.pk)
-
-    def test_set_shopping_cart_id_cookie_updates_cookies_dict(self):
-        cookies = {}
-        cart = baker.make(ShoppingCart)
-        set_shopping_cart_id_cookie(cookies, cart)
-        assert cookies['cart_id'] == str(cart.pk)
 
     def test_update_products_quantity_in_cart_affects_only_products_with_matched_slug(self, create_product):
         cart = baker.make(ShoppingCart)

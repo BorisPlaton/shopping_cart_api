@@ -3,8 +3,8 @@ from datetime import datetime
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 
-from authentication.models import ContactInformation
 from products.models import Product
 
 
@@ -15,6 +15,7 @@ class ShoppingCart(models.Model):
 
     id = models.UUIDField("Cart id", primary_key=True, default=uuid.uuid4, editable=False)
     products = models.ManyToManyField(Product, related_name="carts", through='OrderedProduct')
+    is_ordered = models.BooleanField("Is ordered", default=False)
 
     class Meta:
         verbose_name = "Shopping cart"
@@ -73,10 +74,8 @@ class Order(models.Model):
         ShoppingCart, related_name='order', on_delete=models.PROTECT,
         verbose_name="Cart with products"
     )
-    contact_info = models.ForeignKey(
-        ContactInformation, related_name='orders', on_delete=models.PROTECT,
-        verbose_name="Customer information"
-    )
+    customer_phone = PhoneNumberField("Customer phone number")
+    delivery_place = models.CharField("Place to deliver order", max_length=32)
 
     class Meta:
         verbose_name = "Order"

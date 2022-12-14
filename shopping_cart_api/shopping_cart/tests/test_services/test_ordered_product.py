@@ -5,7 +5,7 @@ from rest_framework.exceptions import NotFound
 from exceptions.http_exceptions import StateConflict
 from products.models import Product
 from shopping_cart.models import ShoppingCart, OrderedProduct
-from shopping_cart.services.ordered_product.services import create_ordered_product
+from shopping_cart.services.orders.services import create_ordered_product
 
 
 @pytest.mark.django_db

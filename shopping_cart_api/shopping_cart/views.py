@@ -1,18 +1,21 @@
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from shopping_cart.services.cookies.selectors import get_shopping_cart_from_cookies
+from shopping_cart.services.cookies.services import get_or_create_shopping_cart_from_cookies
+from shopping_cart.services.responses import get_response_with_shopping_cart_cookie_id
 from view_mixins.mixins.compounds import CompoundMixin
 from shopping_cart.serializers import (
     OrderedProductSerializer, ShoppingCartSerializer, SpecificOrderedProductSerializer
 )
-from shopping_cart.services.ordered_product.services import create_ordered_product
-from shopping_cart.services.shopping_cart.selectors import get_shopping_cart_from_cookies
+from shopping_cart.services.orders.services import (
+    create_ordered_product, create_new_order, get_order_data_from_request
+)
 from shopping_cart.services.shopping_cart.services import (
-    get_or_create_shopping_cart_from_cookies,
-    set_shopping_cart_id_cookie, update_products_quantity_in_cart, delete_products_from_shopping_cart
+    update_products_quantity_in_cart,
+    delete_products_from_shopping_cart, create_shopping_cart
 )
 
 
@@ -43,17 +46,16 @@ class ShoppingCartView(CompoundMixin, GenericViewSet):
         """
         validated_data = self.get_request_data(data=request.data)
         cart = get_or_create_shopping_cart_from_cookies(request.COOKIES)
-        response = Response(
+        return get_response_with_shopping_cart_cookie_id(
+            cart,
             self.get_serializer(create_ordered_product(cart, validated_data)).data,
             status=201
         )
-        set_shopping_cart_id_cookie(response.cookies, cart)
-        return response
 
     @action(methods=['patch'], detail=False, url_path='products/quantity')
     def products_quantity(self, request: Request):
         """
-        Updates products quantity in cart. Products are found by their
+        Updates products quantity in the cart. Products are found by their
         slug.
         """
         validated_data = self.get_request_data(data=request.data, many=True)
@@ -75,25 +77,25 @@ class ShoppingCartView(CompoundMixin, GenericViewSet):
         return Response({'amount': deleted_products_amount})
 
 
-class UserOrdersView(CompoundMixin, GenericViewSet):
+class UserOrdersView(GenericViewSet):
     """
     The view class is responsible for user orders.
     """
 
     queryset = True
-    serializer_class = {
-        'create': ShoppingCartSerializer,
-    }
+    serializer_class = ShoppingCartSerializer
 
     def create(self, request: Request):
         """
-        Creates a new order for the not authenticated user. Additional
-        credentials are required.
+        Creates a new order with given additional data. After this,
+        a new shopping cart will be created.
         """
-
-    @action(methods=['post'], permission_classes=[IsAuthenticated], detail=True)
-    def authenticated(self):
-        """
-        Creates a new order for the authenticated user. Contact
-        information is retrieved from the user model.
-        """
+        created_order = create_new_order(
+            get_shopping_cart_from_cookies(request.COOKIES),
+            get_order_data_from_request(request)
+        )
+        return get_response_with_shopping_cart_cookie_id(
+            create_shopping_cart(),
+            self.get_serializer(created_order).data,
+            status=201
+        )

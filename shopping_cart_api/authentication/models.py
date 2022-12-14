@@ -39,7 +39,7 @@ class ContactInformation(models.Model):
     The additional contact information about the user.
     """
 
-    phone_number = PhoneNumberField()
+    phone_number = PhoneNumberField("User phone number")
     location = models.CharField("Place of residence", max_length=32)
 
     class Meta:

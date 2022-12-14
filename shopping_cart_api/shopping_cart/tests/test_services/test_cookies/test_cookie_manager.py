@@ -1,6 +1,6 @@
 import pytest
 
-from shopping_cart.services.shopping_cart.cart_cookie_manager import CartCookieManager
+from shopping_cart.services.cookies.cart_cookie_manager import CartCookieManager
 
 
 class TestCartCookieManager:
