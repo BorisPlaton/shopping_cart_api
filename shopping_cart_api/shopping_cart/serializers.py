@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ListSerializer
 
+from authentication.serializers import ContactInformationSerializer
 from eager_loaded_serializer.mixin import EagerLoadedSerializerMixin
 from products.serializers import ProductSerializer
 from shopping_cart.models import OrderedProduct, ShoppingCart
@@ -72,11 +73,11 @@ class ShoppingCartSerializer(EagerLoadedSerializerMixin, serializers.ModelSerial
     The serializer for shopping cart with list of ordered products.
     """
 
-    orders = ShoppingCartProductSerializer(many=True, read_only=True)
+    ordered_products = ShoppingCartProductSerializer(many=True, read_only=True)
 
     class Meta:
         model = ShoppingCart
-        fields = ['pk', 'orders']
+        fields = ['pk', 'ordered_products']
 
     @staticmethod
     def setup_eager_loading(value: ShoppingCart, many):
@@ -85,6 +86,15 @@ class ShoppingCartSerializer(EagerLoadedSerializerMixin, serializers.ModelSerial
         a user has many ordered products.
         """
         prefetch_related_objects(
-            [value], 'orders__product__category__parent_category__parent_category__parent_category'
+            [value], 'ordered_products__product__category__parent_category__parent_category__parent_category'
         )
         return value
+
+
+class OrderSerializer(ContactInformationSerializer):
+
+    def to_internal_value(self, data):
+        data = super().to_internal_value(data)
+        data['delivery_place'] = data.pop('location')
+        data['customer_phone'] = data.pop('phone_number')
+        return data
