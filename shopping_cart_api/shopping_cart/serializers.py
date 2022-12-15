@@ -1,4 +1,4 @@
-from django.db.models import prefetch_related_objects
+from django.db.models import prefetch_related_objects, QuerySet
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ListSerializer
@@ -115,6 +115,11 @@ class OrderWithProductsSerializer(EagerLoadedSerializerMixin, ContactInformation
         fields = ['pk', 'customer_phone', 'delivery_place', 'cart']
 
     @staticmethod
-    def setup_eager_loading(value: Order, many: bool):
-        ShoppingCartSerializer.setup_eager_loading(value.cart, False)
+    def setup_eager_loading(value: QuerySet[Order] | Order, many: bool):
+        if not many:
+            ShoppingCartSerializer.setup_eager_loading(value.cart, False)
+        else:
+            value.select_related('cart').prefetch_related(
+                'ordered_products__product__category__parent_category__parent_category__parent_category'
+            )
         return value

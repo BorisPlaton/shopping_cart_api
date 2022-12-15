@@ -113,6 +113,21 @@ class TestShoppingCartView:
         assert response.status_code == 200
         assert ordered_product.quantity == altered_product_quantity
 
+    def test_updates_products_quantity_only_for_digits_greater_than_zero(self, api_client, create_product):
+        ordered_product = baker.make(
+            OrderedProduct, product=create_product(), quantity=1
+        )
+        serialized_ordered_product = self.serialize_order(
+            ordered_product.product.slug, -1
+        )
+        api_client.cookies['cart_id'] = str(ordered_product.cart.pk)
+        response = api_client.patch(
+            reverse('shopping_cart:cart-products-quantity'),
+            json.dumps([serialized_ordered_product]),
+            content_type='application/json'
+        )
+        assert response.status_code == 400
+
     def test_delete_multiple_products_with_the_same_slug_returns_400_error(self, api_client):
         response = api_client.patch(
             reverse('shopping_cart:cart-products-quantity'),

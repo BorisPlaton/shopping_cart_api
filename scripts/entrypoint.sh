@@ -1,11 +1,8 @@
 #!/bin/sh
 #
-# Performs setup operations for the project in the production mode.
+# Performs setup operations for the project in production mode.
 
 python manage.py migrate --no-input
-python manage.py collectstatic --no-input
-python manage.py check --deploy --settings config.settings.production
+python manage.py check --deploy --settings config.settings
 
-mv ./media/* /media && rm -rf ./media
-
-gunicorn config.wsgi:application --bind 0.0.0.0:"$PORT" --access-logfile -
+gunicorn config.wsgi:application --bind 0.0.0.0:"$APP_PORT" --access-logfile -

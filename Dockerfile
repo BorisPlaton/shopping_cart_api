@@ -5,10 +5,10 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
 
-COPY requirements.dev.txt .
-RUN pip install --no-cache-dir -r requirements.dev.txt && rm -f requirements.dev.txt
-
 COPY ./scripts/entrypoint.sh .
 ENTRYPOINT ["sh", "entrypoint.sh"]
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt && rm -f requirements.txt
 
 COPY ./shopping_cart_api .

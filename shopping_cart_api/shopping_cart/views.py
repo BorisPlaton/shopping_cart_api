@@ -84,7 +84,7 @@ class UserOrdersView(GenericViewSet):
     The view class is responsible for user orders.
     """
 
-    @action(detail=False, permission_classes=[IsAuthenticated], url_path='')
+    @action(detail=False, permission_classes=[IsAuthenticated], url_path='user')
     def user_orders(self, request: Request):
         """
         Returns the orders list of authenticated user.
