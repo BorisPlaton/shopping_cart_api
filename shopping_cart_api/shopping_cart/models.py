@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
+from authentication.models import CustomUser
 from products.models import Product
 
 
@@ -76,6 +77,10 @@ class Order(models.Model):
     )
     customer_phone = PhoneNumberField("Customer phone number")
     delivery_place = models.CharField("Place to deliver order", max_length=32)
+    customer = models.ForeignKey(
+        CustomUser, verbose_name="Customer", on_delete=models.CASCADE, null=True,
+        related_name='orders'
+    )
 
     class Meta:
         verbose_name = "Order"

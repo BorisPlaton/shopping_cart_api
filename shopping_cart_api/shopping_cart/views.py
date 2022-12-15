@@ -1,11 +1,12 @@
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from shopping_cart.services.cookies.selectors import get_shopping_cart_from_cookies
 from shopping_cart.services.cookies.services import get_or_create_shopping_cart_from_cookies
+from shopping_cart.services.orders.selectors import get_user_orders
 from shopping_cart.services.responses import get_response_with_shopping_cart_cookie_id
 from view_mixins.mixins.compounds import CompoundMixin
 from shopping_cart.serializers import (
@@ -78,19 +79,30 @@ class ShoppingCartView(CompoundMixin, GenericViewSet):
         return Response({'amount': deleted_products_amount})
 
 
-class UserOrdersView(APIView):
+class UserOrdersView(GenericViewSet):
     """
     The view class is responsible for user orders.
     """
 
-    def post(self, request: Request):
+    @action(detail=False, permission_classes=[IsAuthenticated], url_path='')
+    def user_orders(self, request: Request):
+        """
+        Returns the orders list of authenticated user.
+        """
+        return Response(
+            OrderWithProductsSerializer(
+                get_user_orders(request.user), eager_loading=True, many=True
+            ).data
+        )
+
+    def create(self, request: Request):
         """
         Creates a new order with given additional data. After this,
         a new shopping cart will be created.
         """
         created_order = create_new_order(
             get_shopping_cart_from_cookies(request.COOKIES),
-            get_order_data_from_request(request)
+            *get_order_data_from_request(request)
         )
         return get_response_with_shopping_cart_cookie_id(
             create_shopping_cart(),

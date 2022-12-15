@@ -3,7 +3,9 @@ import json
 import pytest
 from django.urls import reverse
 from model_bakery import baker
+from rest_framework_simplejwt.tokens import RefreshToken
 
+from authentication.models import CustomUser
 from products.models import Product
 from shopping_cart.models import ShoppingCart, OrderedProduct
 
@@ -140,15 +142,19 @@ class TestShoppingCartView:
 @pytest.mark.django_db
 class TestUserOrdersView:
 
+    def get_access_token(self, user):
+        refresh = RefreshToken.for_user(user)
+        return str(refresh.access_token)
+
     def test_create_new_order_if_no_cart_404_status_code_returned(self, api_client):
-        response = api_client.post(reverse('shopping_cart:order-create'))
+        response = api_client.post(reverse('shopping_cart:orders-list'))
         assert response.status_code == 404
 
     def test_if_no_ordered_products_in_cart_400_status_code_returned(self, api_client, phone_number):
         cart = baker.make(ShoppingCart)
         api_client.cookies['cart_id'] = str(cart.pk)
         response = api_client.post(
-            reverse('shopping_cart:order-create'),
+            reverse('shopping_cart:orders-list'),
             json.dumps({'location': 'NY', 'phone_number': phone_number}),
             content_type='application/json'
         )
@@ -161,7 +167,7 @@ class TestUserOrdersView:
         old_cart_id = str(cart.pk)
         api_client.cookies['cart_id'] = old_cart_id
         response = api_client.post(
-            reverse('shopping_cart:order-create'),
+            reverse('shopping_cart:orders-list'),
             json.dumps({'location': 'NY', 'phone_number': phone_number}),
             content_type='application/json'
         )
@@ -170,3 +176,10 @@ class TestUserOrdersView:
         assert new_cart_id != old_cart_id
         new_cart = ShoppingCart.objects.get(pk=new_cart_id)
         assert not new_cart.is_ordered
+
+    def test_user_orders_list_returns_empty_list_if_none(self, api_client):
+        user = baker.make(CustomUser)
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.get_access_token(user))
+        response = api_client.get(reverse('shopping_cart:orders-user-orders'))
+        assert isinstance(response.data, list)
+        assert not response.data
