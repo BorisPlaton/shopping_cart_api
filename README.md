@@ -3,7 +3,7 @@
 
 [Implementation](https://docs.google.com/document/d/16M_jtHkbrHgI_gUj9vq6p_uIQVQTFuW2kXUsK-S4RSk/edit) of the API of a shopping cart, products and their categories.
 
-The API [documentation](https://documenter.getpostman.com/view/24654961/2s8YzXtzBz) via Postman.
+The API [documentation](https://documenter.getpostman.com/view/25786085/2s9YyvCLbD) via Postman.
 
 ## Setup
 
