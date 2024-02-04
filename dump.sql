@@ -1,6 +1,5 @@
 -- docker compose cp dump.sql database:dump.sql
--- docker compose exec database sh 
--- psql -U dev -p 5432 -d shopping_cart -f dump.sql
+-- docker compose exec -d database psql -U dev -p 5432 -d shopping_cart -f dump.sql
 
 INSERT INTO public.products_category VALUES (1, 'Clothes', 1, 6, 2, 0, NULL);
 INSERT INTO public.products_category VALUES (2, 'T-Shirts', 4, 5, 2, 1, 1);
